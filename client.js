@@ -1656,7 +1656,7 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 										}),
 									);
 								}
-								if (parts.length === 0) parts.push(tr("restart.incomplete.flash", { entry: "unknown" }));
+								if (parts.length === 0) parts.push(d.error ? String(d.error) : tr("restart.incomplete.flash", { entry: "unknown" }));
 								setNotice({
 									kind: "error",
 									text: tr("restart.incomplete", { detail: parts.join("；") }),
