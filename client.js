@@ -329,6 +329,8 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"restart.timeout": "超时，请刷新",
 			"restart.fail": "失败: {error}",
 			"restart.notStarted": "重启没有开始，客户端还在。不会自动再试。",
+			"promptOnly.apply": "提示词已生效。当前是第三方桌面密封壳（如 DSH NEXT / dsh-desktop），代码补丁物理上写不进去，已跳过——这是预期，不是失败。",
+			"promptOnly.restart": "无需重启：密封壳里没有代码补丁可加载，重启应用只为让提示词重新读取。",
 			"restart.already": "这一次重启已经开始，不会再重启一次。",
 			"restart.confirm": "清洗已完成，重启后生效。",
 			"restart.confirm.desktop": "清洗已完成，重启桌面应用后生效。",
@@ -669,6 +671,8 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"restart.timeout": "Timed out; refresh",
 			"restart.fail": "Failed: {error}",
 			"restart.notStarted": "Restart did not start. This client is still open, and it will not try again by itself.",
+			"promptOnly.apply": "Prompt is active. This is a sealed third-party desktop shell (DSH NEXT / dsh-desktop): code patches cannot be written inside it and were skipped on purpose, not as a failure.",
+			"promptOnly.restart": "No restart needed: there are no code patches to load in the sealed shell; restarting the app only re-reads the prompt.",
 			"restart.already": "This restart already started. It will not restart again.",
 			"restart.confirm": "Apply finished. Restart to take effect.",
 			"restart.confirm.desktop": "Apply finished. Restart the desktop app to take effect.",
@@ -1634,6 +1638,11 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 									setOverride(d.override_content);
 									setOverrideLoaded(true);
 								}
+							}
+							if (action === "apply" && d.promptOnly) {
+								setNotice({ kind: "ok", text: tr("promptOnly.apply") });
+								loadAll();
+								return;
 							}
 							if (action === "apply" && d.complete === false) {
 								const parts = [];
@@ -2741,6 +2750,13 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 				.then((r) => r.json())
 				.then((d) => {
 					if (!d.ok) throw new Error(d.error || "restart failed");
+					if (d.promptOnly) {
+						clearTimeout(watch);
+						restartOnce = false;
+						setBusy(false);
+						setNotice({ kind: "ok", text: t("promptOnly.restart") });
+						return;
+					}
 					const next = (d && d.surface) || surf;
 					const full = next === "desktop" || (d && d.fullApp) || desktop;
 					if (full && d.already) {
