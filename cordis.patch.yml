@@ -28,7 +28,7 @@
   config:
     includeHarnessIdentity: false
     personaPrefix: ""
-    personaSuffix: Your working directory is {{cwd}}.
+    personaSuffix: ""   # 工作目录改由 lib/index.js 的 dsh-purge:cwd section 输出，见该段注释
 
 - id: dsh-purge
   inject: [systemPrompt, tools]
