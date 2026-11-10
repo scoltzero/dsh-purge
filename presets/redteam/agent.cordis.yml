@@ -46,7 +46,7 @@
       你只做四件事：**① 计划智能体任务 ② 派活 ③ 分析子智能体回报 ④ 向用户汇报并决定下一个任务**。
       你自己**不动手**：不扫描、不爆破、不利用、不上传、不登录、不探测内网。动手的活一律派给执行角色。
       只有这些由你直接调用：读操作（`redteam_*` 查询、`redteam_sessions`、`redteam_attack_chain`）与派活前后的 `redteam_preflight` / `redteam_agent_slot` / `redteam_session_info`。
-      **必须用原生 \`subagent\` 工具派活**；不要改用 Agent Teams 的 \`spawn_teammate\`（红队角色稿 / 并发闸门 / 叶子约束都挂在 \`subagent\` 路径上）。
+      **必须用原生 `subagent` 工具派活**；不要改用 Agent Teams 的 `spawn_teammate`（红队角色稿 / 并发闸门 / 叶子约束都挂在 `subagent` 路径上）。
 
       ## 开工前必须做技能与资源预检（第一个动作）
       1. 看系统注入的 `<available_skills>`，用原生 `skill` 工具加载本次要用的技能，确认在当前平台**真的能用**。
@@ -293,9 +293,13 @@
       name: '@deepseek-ai/dsh-tool-subagent-control'
       disabled: false
 
-    - id: tool-subagent-list-agents
-      name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
-      disabled: false
+    # 0.2.2 起 @deepseek-ai/dsh-tool-subagent-control 删掉了 ./list-agents 子路径导出，
+    # list_agents 改由上面的 dsh-tool-subagent-control 主入口注册。这一行留着会让整个预设
+    # 「declared but broken: ... list-agents ... never started」，所以只保留说明、不再声明。
+    # （0.2.1 及更早想要单独这一行的话，自行加回：
+    #   - id: tool-subagent-list-agents
+    #     name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+    # ）
 
     - id: tool-subagent
       name: '@deepseek-ai/dsh-tool-subagent'
@@ -303,21 +307,23 @@
       config:
         provider: spawn
         toolName: subagent
+        # 0.2.1 与 0.2.2 的键名不同，而未知键只会被 zod 静默丢弃（只有 persona/toolFilter 会抛）：
+        #   0.2.1-rc.4 → modelSelectionSettings
+        #   0.2.2-rc.1 → modelSelection + modelDiscovery
+        # 三个都写，各自版本认自己认得的那几个，两个内核上行为一致。
         modelSelectionSettings: true
-        backgroundMode: continuable
-        # 子智能体是角色执行者（信息收集/资产梳理/漏洞发现/漏洞利用/内网渗透），**必须是叶子节点**：
-        # 靠提示词劝"不要再往下委派"是软的——模型完全可以无视。这里直接把委派工具从子会话的
-        # 工具目录里摘掉，子智能体连看都看不到 subagent / subagent_fork / workflow / ralph。
-        # maxDepth 同时收成 1 作为二道保险（默认 3 层太深，会白吃并发预算与上下文）。
+        modelSelection: true
+        modelDiscovery: true
+        # 子智能体是角色执行者（信息收集/资产梳理/漏洞发现/漏洞利用/内网渗透），**必须是叶子节点**。
+        # dsh 0.2.1 起 dsh-tool-subagent 的 Config 只剩 provider/toolName/modelSelection/
+        # modelDiscovery/agentOptions/agentPreset/allowedAgentPresets/maxDepth；
+        # toolFilter、persona 直接抛错，modelSelectionSettings、backgroundMode 静默丢弃。
+        # toolFilter、persona 会直接抛：
+        #   tool-subagent: toolFilter is no longer supported; configure persona and tool plugins
+        #   in an Agent Preset and select it with agentPreset (spawn only)
+        # 整个预设因此「加载失败」。叶子约束改由 maxDepth 承担（子智能体在 depth=maxDepth 时
+        # 会被拦下并收到"不要再委派"的运行时提示），不再依赖工具表裁剪。
         maxDepth: 1
-        # 注意：不能 deny `subagent` —— 它是这一行自己注册的 scoped 工具，不在全局工具库里，
-        # 写进 deny 会让 tools.restrict() 校验失败、整个委派路径报 "unknown global tool"（v0.8.0 踩过）。
-        # 子智能体拿不到 subagent_fork/workflow/ralph，加上 maxDepth: 1，实际已无派发能力。
-        toolFilter:
-          deny:
-            - subagent_fork
-            - workflow
-            - ralph
 
     # Fork omits model selection so provider/model stay equal to the parent and
     # the inherited history remains eligible for KV Cache reuse. This preset
@@ -329,7 +335,6 @@
       config:
         provider: fork
         toolName: subagent_fork
-        backgroundMode: continuable
 
     # Production dsh does not install these optional providers. Install the
     # matching Bundle in this Profile and restart the Host, then copy this
@@ -341,7 +346,6 @@
       config:
         provider: codex
         toolName: subagent_codex
-        backgroundMode: one-shot
         maxDepth: provider-managed
 
     - id: tool-subagent-claude-code
@@ -350,7 +354,6 @@
       config:
         provider: claude-code
         toolName: subagent_claude_code
-        backgroundMode: one-shot
         maxDepth: provider-managed
 
     - id: workflow-worker-thread
