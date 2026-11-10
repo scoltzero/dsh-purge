@@ -3,7 +3,7 @@
 本仓库是 **[YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge)** 的**全量镜像（mirror）**，
 由 [@mmparko](https://github.com/mmparko) 在上游宣布删库前完整备份，用于存档与分发。
 
-> **维护线 / Maintained branch**：默认分支为 `fix`。`master` 保留为上游镜像存档，不再作为安装与发版入口。
+> **维护线 / Maintained branch**：默认分支为 `fix`，维护者 [@scoltzero](https://github.com/scoltzero)。`master` 保留为上游镜像存档，不再作为安装与发版入口。
 > 插件安装包、更新检查与 Release 均指向本仓库 `scoltzero/dsh-purge` 的 `fix` 线；原作者署名、MIT 许可证与
 > 非盈利条款保持不变，本维护线只做新版宿主兼容与缺陷修复，不主张原创。
 
