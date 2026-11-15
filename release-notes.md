@@ -1,3 +1,23 @@
+# 1.1.72-fix1.6
+
+## 中文
+
+- 版本 **1.1.72-fix1.6**。
+- **修复解包后 App 起不来（`Cannot find module 'tslib'`）**：Electron 的 `asarUnpack` 会把 `tslib`/`node-pty`/`koffi` 这类包的实际文件放在 `app.asar.unpacked/`，asar 里只剩桩。1.3~1.5 只解 asar、没合并 `.unpacked`，于是 `resources/app` 里这些包是空壳，主进程一 require 就崩。
+  - 现在解包流程：`extractAsarToSide` → `commitExtractedDir` → **把 `<asar>.unpacked` 递归覆盖进 `app/`**（DSH NEXT 实测覆盖 3106 个文件）→ 校验哨兵包（tslib/node-pty/koffi 的 package.json）→ 才把 `app.asar` 改名备份。
+  - **失败即回滚**：哨兵缺失时返回 `incomplete-extract`，删掉半成品 `app/`、保留原 `app.asar`，绝不把用户 App 弄到起不来。
+- 实测：副本解包 `entries 18650 / overlaid 3106`，`require.resolve('tslib')` 正常；故意去掉 `.unpacked` 时返回 `incomplete-extract` 且 asar 原封不动。
+
+## English
+
+- Version **1.1.72-fix1.6**.
+- **Fix the app failing to boot after unpacking (`Cannot find module 'tslib'`)**: Electron `asarUnpack` keeps the real files of `tslib` / `node-pty` / `koffi` under `app.asar.unpacked/`, leaving only stubs inside the asar. 1.3–1.5 extracted the asar without merging `.unpacked`, so `resources/app` had empty shells and the main process crashed on require.
+  - New flow: `extractAsarToSide` → `commitExtractedDir` → **recursively overlay `<asar>.unpacked` into `app/`** (3106 files on DSH NEXT) → verify sentinel packages → only then rename `app.asar` to the backup.
+  - **Fail closed**: on a missing sentinel return `incomplete-extract`, delete the half-built `app/` and keep the original `app.asar`.
+- Measured: `entries 18650 / overlaid 3106`, `require.resolve('tslib')` fine; with `.unpacked` removed it returns `incomplete-extract` and leaves the asar untouched.
+
+---
+
 # 1.1.72-fix1.5
 
 ## 中文
