@@ -1,3 +1,23 @@
+# 1.1.72-fix1.3
+
+## 中文
+
+- 版本 **1.1.72-fix1.3**（基于上游 1.1.71 的镜像 `fix` 分支）。
+- **第三方桌面壳自动解包**：DSH NEXT / dsh-desktop 把宿主封在自己的 `app.asar` 里，普通 Node 写不进归档，所以之前点「应用」只写提示词层。现在 `apply` 会先把它解成 `resources/app`（原包改名 `app.asar.dsh-purge.bak`），再照常打补丁；`revert` 会把 asar 还原回去。
+- 实测（DSH NEXT 2.0.21 副本，内核 0.2.1-rc.4）：解包 18650 条 / 226MB / 2.3s，打补丁 `applied 59 + already 6`，`hostWritten=true`。#60 / #62 / #17 / #54 全部落地。
+- **#32 / #53 跟进 0.2.1+**：Web surface 的身份句与「禁止另开服务器」搬到了 `dsh-harness-dev-context`，新增 target 键与对应 pattern；0.2.2 同样受益。
+- 说明：#80 是「清理旧版追加行」的补丁，官方极简工具表本来就没有那些行，显示 skipped 属正常；#77/#56 依赖 0.2.0 客户端的 rewind 实现，0.2.1 起客户端已无该概念；#71 需要先装梁神预设。
+
+## English
+
+- Version **1.1.72-fix1.3** on the mirror's `fix` branch (upstream base 1.1.71).
+- **Auto-unpack third-party desktop shells**: DSH NEXT / dsh-desktop ship the host inside their own `app.asar`, which plain Node cannot write into — so Apply used to write only the prompt layer. Apply now extracts it to `resources/app` (original renamed `app.asar.dsh-purge.bak`) and patches there; Revert restores the asar.
+- Measured on a DSH NEXT 2.0.21 bundle copy (kernel 0.2.1-rc.4): 18650 entries / 226MB in 2.3s, then `applied 59 + already 6`, `hostWritten=true`; #60 / #62 / #17 / #54 all land.
+- **#32 / #53 for 0.2.1+**: the Web-surface identity sentence and the "do not start a replacement server" clause moved to `dsh-harness-dev-context`; new target key + patterns (0.2.2 benefits too).
+- Notes: #80 only cleans rows an old version injected, so `skipped` is correct; #77/#56 depend on the 0.2.0 client's rewind implementation, absent since 0.2.1; #71 needs the liangshen preset installed.
+
+---
+
 # 1.1.71
 
 ## 中文
