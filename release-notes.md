@@ -1,3 +1,25 @@
+# 1.1.72-fix1.5
+
+## 中文
+
+- 版本 **1.1.72-fix1.5**。
+- **状态计数修正**（功能早就生效、只是数字不认）：
+  - `#17` 观察策略读写放行：0.2.2 里 `editIntent` 实现变了，写侧已打上、编辑侧无对应文本 → 加 `softSettle`，没有残留 pattern 即按已完成。
+  - `#53` 网页去禁止另开服务器：属版本间搬家的文本补丁，同样 `softSettle`；目标句已从 `lib/index.js` 消失。
+- 沿用 fix1.4 的成果：`#60`→`dsh-tool-executor-ptc`、`#54`→`dsh-deliverable-file-references`、`#62`→`dsh-tools/lib/types/pipeline.js`、`#77` 0.2.2 客户端变体、删除型补丁判定。
+- **本机实测（web 内核 0.2.2-rc.1）**：面板口径从 `54/63` → **`62/63`**；唯一剩下的是 `#71`（梁神预设未安装，装了才会打）。
+
+## English
+
+- Version **1.1.72-fix1.5**.
+- **Status counting fixed** (the features were already in, only the tally disagreed):
+  - `#17` observation write/edit bypass: 0.2.2 changed `editIntent`; the write half is applied and the edit half has no matching text → `softSettle` (no residual pattern = settled).
+  - `#53` web-surface "do not start a replacement server": a version-moved text patch, also `softSettle`; the sentence is gone from `lib/index.js`.
+- Keeps fix1.4's work: `#60`→`dsh-tool-executor-ptc`, `#54`→`dsh-deliverable-file-references`, `#62`→`dsh-tools/lib/types/pipeline.js`, `#77` 0.2.2 client variant, deletion-only settlement.
+- **Measured on this machine (web kernel 0.2.2-rc.1)**: panel tally went `54/63` → **`62/63`**; the only remainder is `#71` (liangshen preset not installed).
+
+---
+
 # 1.1.72-fix1.4
 
 ## 中文
