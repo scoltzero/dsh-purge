@@ -331,6 +331,8 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"restart.notStarted": "重启没有开始，客户端还在。不会自动再试。",
 			"promptOnly.apply": "提示词已生效。当前是第三方桌面密封壳（如 DSH NEXT / dsh-desktop），代码补丁物理上写不进去，已跳过——这是预期，不是失败。",
 			"promptOnly.restart": "无需重启：密封壳里没有代码补丁可加载，重启应用只为让提示词重新读取。",
+			"unpacked.apply": "已解包 DSH NEXT 的应用包并把补丁写进去（原包备份为 {backup}，可「还原」回滚）。请完全退出 App 再打开，补丁才会生效。",
+			"unpacked.failed": "解包这个桌面发行版的应用包失败（{reason}），本次仍只写提示词层。",
 			"restart.already": "这一次重启已经开始，不会再重启一次。",
 			"restart.confirm": "清洗已完成，重启后生效。",
 			"restart.confirm.desktop": "清洗已完成，重启桌面应用后生效。",
@@ -673,6 +675,8 @@ window.__ModuleLoader__.load({ id: "dsh-purge", factory: (require) => {
 			"restart.notStarted": "Restart did not start. This client is still open, and it will not try again by itself.",
 			"promptOnly.apply": "Prompt is active. This is a sealed third-party desktop shell (DSH NEXT / dsh-desktop): code patches cannot be written inside it and were skipped on purpose, not as a failure.",
 			"promptOnly.restart": "No restart needed: there are no code patches to load in the sealed shell; restarting the app only re-reads the prompt.",
+			"unpacked.apply": "Unpacked the DSH NEXT app bundle and wrote the patches (original backed up as {backup}; Revert restores it). Fully quit and reopen the app for them to take effect.",
+			"unpacked.failed": "Could not unpack this desktop distribution's app bundle ({reason}); only the prompt layer was written this time.",
 			"restart.already": "This restart already started. It will not restart again.",
 			"restart.confirm": "Apply finished. Restart to take effect.",
 			"restart.confirm.desktop": "Apply finished. Restart the desktop app to take effect.",
@@ -1639,8 +1643,21 @@ body:not([data-ds-dark-theme]) .dshp-auth-ops button.primary{background:var(--ds
 									setOverrideLoaded(true);
 								}
 							}
+							if (action === "apply" && d.unpacked) {
+								setNotice({
+									kind: "ok",
+									text: tr("unpacked.apply", { backup: String(d.unpack_backup || "app.asar.dsh-purge.bak") }),
+								});
+								loadAll();
+								return;
+							}
 							if (action === "apply" && d.promptOnly) {
-								setNotice({ kind: "ok", text: tr("promptOnly.apply") });
+								setNotice({
+									kind: "ok",
+									text: d.unpack_error
+										? tr("promptOnly.apply") + " " + tr("unpacked.failed", { reason: String(d.unpack_error) })
+										: tr("promptOnly.apply"),
+								});
 								loadAll();
 								return;
 							}
