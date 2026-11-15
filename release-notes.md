@@ -1,3 +1,21 @@
+# 1.1.72-fix1.4
+
+## 中文
+
+- 版本 **1.1.72-fix1.4**。
+- **修根因**：`findAiBase()` 在 DSH NEXT 里会顺着 require / `DSH_HOME` 走到**别的 dsh 安装**（本机是 `~/.local` 那份 web 用的 0.2.2-rc.1），于是面板上的「54/63」是别人家的状态，补丁也一直打在别人身上——这才是「功能没生效」的真正原因，比 asar 更靠前。
+- 新增 `thirdPartyDesktopAiBase()`：第三方桌面壳里优先返回**当前宿主自己的**内核目录（密封期是 `Resources/app.asar/node_modules/@deepseek-ai`，解包后是 `Resources/app/node_modules/@deepseek-ai`），`findAiBase()` 最先查它。
+- 配合 fix1.3 的解包流程：点一次「应用」→ 解包 → 补丁打到 App 自己的内核 → 完全退出 App 再打开即生效。
+
+## English
+
+- Version **1.1.72-fix1.4**.
+- **Root cause fix**: inside DSH NEXT, `findAiBase()` followed require/`DSH_HOME` to a **different dsh installation** (on this machine `~/.local`, the 0.2.2-rc.1 used by `dsh web`), so the panel's "54/63" was another installation's state and every patch landed there. That — not the asar — is why the features never showed up.
+- New `thirdPartyDesktopAiBase()`: inside a third-party desktop shell it returns the **host's own** kernel directory (`Resources/app.asar/node_modules/@deepseek-ai` while sealed, `Resources/app/node_modules/@deepseek-ai` after unpacking); `findAiBase()` now checks it first.
+- Combined with fix1.3's unpack: one Apply → unpack → patches written into the app's own kernel → fully quit and reopen to take effect.
+
+---
+
 # 1.1.72-fix1.3
 
 ## 中文
