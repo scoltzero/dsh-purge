@@ -6,6 +6,8 @@
 - **修根因**：`findAiBase()` 在 DSH NEXT 里会顺着 require / `DSH_HOME` 走到**别的 dsh 安装**（本机是 `~/.local` 那份 web 用的 0.2.2-rc.1），于是面板上的「54/63」是别人家的状态，补丁也一直打在别人身上——这才是「功能没生效」的真正原因，比 asar 更靠前。
 - 新增 `thirdPartyDesktopAiBase()`：第三方桌面壳里优先返回**当前宿主自己的**内核目录（密封期是 `Resources/app.asar/node_modules/@deepseek-ai`，解包后是 `Resources/app/node_modules/@deepseek-ai`），`findAiBase()` 最先查它。
 - 配合 fix1.3 的解包流程：点一次「应用」→ 解包 → 补丁打到 App 自己的内核 → 完全退出 App 再打开即生效。
+- **目标包搬迁跟进（0.2.2）**：`#60` run_code 描述 → `dsh-tool-executor-ptc`；`#54` 交付物禁止句 → `dsh-deliverable-file-references`；`#62` ask fail-open → `dsh-tools/lib/types/pipeline.js`；`#77` 客户端 `append(record)` 多了 `revised.size` 判空 → 新增 0.2.2 变体。实测本机 web 安装：applied 54 → **67**，skipped 9 → **3**。
+- **删除型补丁判定**：只删不改的补丁（`replace: ""`）在目标句已不存在时算完成，不再永远显示 skipped（`#53`/`#54` 这类）。
 - **修正 1.4 首版回归**：密封期的 `app.asar/...` 普通 Node 读不了（`ENOTDIR`），把它当 base 会让状态全变 `missing_file`、面板显示 `0/32`。现在 `thirdPartyDesktopAiBase()` 只认**已解包**的 `resources/app`；密封期状态接口返回 `ai_base: ""` + `sealed_third_party: true`，面板显示「待解开 · 点应用解开」，不再摆假数字。
 
 ## English
